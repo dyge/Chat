@@ -2,46 +2,46 @@ import socket
 import threading
 import select
 
-# def send(c):
-#     inready,outputready,exceptrdy = select.select([],c,[])
-#     for i in outputready:
-#         i.send(msg)
-#
-# def receive(c):
-#     while True:
-#         inputready,outready,exceptrdy = select.select([c],[],[])
-#         if inputready != []:
-#             msg = c.recv(1024)
-#             if not msg:
-#                 break
-#             print(str(msg, "utf8"))
+def send(co):
+    msg_old = ''
+    while True:
+        try:
+            if msg_old != msg:
+                print(co)
+                co.send(msg)
+                print("send")
+                msg_old = msg
+        except NameError:
+            pass
+
+def receive(c):
+    while True:
+        global msg
+        msg = c.recv(1024)
+        if not msg:
+            break
+        print(str(msg, "utf8"))
+    print("client disconnected")
 
 class ClientThread(threading.Thread):
     def __init__(self, clientAddr, client_socket):
         threading.Thread.__init__(self)
         self.csocket = client_socket
-        self.connections = []
+        print(self.csocket)
     def run(self):
         print("Connection")
-        self.connections.append(self.csocket)
-        # threading.start_new_thread(receive, (self.csocket))
-        self.c = []
-        for i in self.connections:
-            self.c.append(i)
-        self.c.remove(self.csocket)
-        # threading.start_new_thread(send, (self.c))
-        while True:
-            msg = self.csocket.recv(1024)
-            if not msg:
-                break
-            print(str(msg, "utf8"))
-        self.connections.remove(self.csocket)
-        print("client disconnected")
+        connections.append(self.csocket)
+        print(connections)
+        t1 = threading.Thread(target=receive, args=(self.csocket,))
+        t1.start()
+        t2 = threading.Thread(target=send, args=(self.csocket,))
+        t2.start()
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = ''
-port = 5000
+port = 1337
 server_socket.bind((host, port))
+connections = []
 while True:
     server_socket.listen(1)
     (client_socket, addr) = server_socket.accept()
